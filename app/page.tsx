@@ -1,13 +1,11 @@
-import Header from "@/components/Layouts/Header";
-import HomeMain from "@/features/Home/HomeMain";
 import { PageWrapper } from "@/components/Layouts/Wrappers";
+import BookLibrary from "@/features/Auth/Home/BookLibrary";
 
 export default function Home() {
   return (
     <>
-      <Header />
       <PageWrapper>
-        <HomeMain />
+        <BookLibrary />
       </PageWrapper>
     </>
   );
