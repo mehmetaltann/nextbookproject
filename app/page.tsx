@@ -1,12 +1,21 @@
+import BookLibrary from "@/features/BookLibrary";
 import { PageWrapper } from "@/components/Layouts/Wrappers";
-import BookLibrary from "@/features/Auth/Home/BookLibrary";
+import { Loader } from "../components/Layouts/Loader";
+import { fetchBooks } from "./actions/action";
+import { Book } from "@/lib/types/types";
 
-export default function Home() {
+export default async function Home() {
+  const books = (await fetchBooks()) as Book[];
+
   return (
     <>
-      <PageWrapper>
-        <BookLibrary />
-      </PageWrapper>
+      {books ? (
+        <PageWrapper>
+          <BookLibrary books={books} />
+        </PageWrapper>
+      ) : (
+        <Loader />
+      )}
     </>
   );
 }

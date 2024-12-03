@@ -1,6 +1,12 @@
 import { TextField } from "@mui/material";
+import { Dispatch, SetStateAction } from "react";
 
-const SearchBar = ({ searchTerm, setSearchTerm }) => {
+interface SearchBarProps {
+  searchTerm: string;
+  setSearchTerm: Dispatch<SetStateAction<string>>;
+}
+
+const SearchBar = ({ searchTerm, setSearchTerm }: SearchBarProps) => {
   return (
     <TextField
       label="Kitap Ara"

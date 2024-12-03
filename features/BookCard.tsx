@@ -1,4 +1,11 @@
-import { Card, CardContent, CardMedia, Typography, Chip, IconButton } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Chip,
+  IconButton,
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 
 const BookCard = ({ book, onStatusChange, onEdit }) => {
@@ -16,10 +23,16 @@ const BookCard = ({ book, onStatusChange, onEdit }) => {
           Yazar: {book.author}
         </Typography>
         <Chip
-          label={book.status === "okunuyor" ? "Okunuyor" : book.status === "okundu" ? "Okundu" : "Okunacak"}
+          label={
+            book.status === "okunuyor"
+              ? "Okunuyor"
+              : book.status === "okundu"
+              ? "Okundu"
+              : "Okunacak"
+          }
           color={book.status === "okunuyor" ? "primary" : "default"}
           style={{ marginTop: "10px", marginRight: "10px" }}
-          onClick={() => onStatusChange(book)} // Durum değiştirme için
+          onClick={() => onStatusChange(book)}
         />
         <IconButton onClick={() => onEdit(book)} color="primary">
           <EditIcon />
