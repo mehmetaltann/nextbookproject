@@ -1,17 +1,18 @@
-import BookLibrary from "@/features/BookLibrary";
-import { PageWrapper } from "@/components/Layouts/Wrappers";
-import { Loader } from "../components/Layouts/Loader";
-import { fetchBooks } from "./actions/action";
-import { Book } from "@/lib/types/types";
+import BookLibrary from "@/features/Home/BookLibrary";
+import { PageWrapper } from "@/components/Wrappers";
+import { Loader } from "../components/Loader";
+import { fetchBookClassy, fetchBooks } from "./actions/action";
+import { Book, BookClassy } from "@/lib/types/types";
 
 export default async function Home() {
   const books = (await fetchBooks()) as Book[];
+  const bookClassies = (await fetchBookClassy()) as BookClassy[];
 
   return (
     <>
-      {books ? (
+      {books && bookClassies ? (
         <PageWrapper>
-          <BookLibrary books={books} />
+          <BookLibrary books={books} bookClassies={bookClassies} />
         </PageWrapper>
       ) : (
         <Loader />

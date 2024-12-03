@@ -7,11 +7,12 @@ import BookDialog from "./BookDialog";
 import BookCard from "./BookCard";
 import dayjs from "dayjs";
 import { useState, useEffect } from "react";
-import { Book, BookWithoutId } from "@/lib/types/types";
+import { Book, BookClassy, BookWithoutId } from "@/lib/types/types";
 import { AppBar, Toolbar, Typography, Tabs, Tab, Fab } from "@mui/material";
 
 interface BookLibraryProps {
   books: Book[];
+  bookClassies: BookClassy[];
 }
 
 const initalBookData: BookWithoutId = {
@@ -30,7 +31,7 @@ const initalBookData: BookWithoutId = {
   durum: "Okunmadı",
 };
 
-const BookLibrary = ({ books }: BookLibraryProps) => {
+const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [openStatusDialog, setOpenStatusDialog] = useState<boolean>(false);
   const [openBookDialog, setOpenBookDialog] = useState<boolean>(false);
@@ -126,6 +127,7 @@ const BookLibrary = ({ books }: BookLibraryProps) => {
         editedBook={editedBook}
         setEditedBook={setEditedBook}
         handleBookInsert={handleBookInsert}
+        bookClassies={bookClassies}
       />
     </div>
   );

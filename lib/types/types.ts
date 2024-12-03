@@ -30,3 +30,18 @@ export type BookWithoutId = {
   coverImage: string;
   durum: string;
 };
+
+export type BookClassy = {
+  _id: string;
+  type: string;
+  categories: { name: string }[];
+};
+
+export type BookClassyWithoutId = {
+  type: string;
+  categories: { name: string }[];
+};
+
+export type Category = {
+  name: string;
+};
