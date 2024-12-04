@@ -6,7 +6,7 @@ export type Book = {
   yayinevi: string;
   sayfaSayisi: string;
   tur: string;
-  kategori: string;
+  kategori: string[];
   yayinTarihi: string;
   alinmaTarihi: string;
   okunmaTarihi: string;
@@ -22,7 +22,7 @@ export type BookWithoutId = {
   yayinevi: string;
   sayfaSayisi: string;
   tur: string;
-  kategori: string;
+  kategori: string[];
   yayinTarihi: string;
   alinmaTarihi: string;
   okunmaTarihi: string;

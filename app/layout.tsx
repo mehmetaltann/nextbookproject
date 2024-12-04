@@ -5,6 +5,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { GlobalTheme } from "@/lib/styles/GlobalTheme";
 import { ToastContainer } from "react-toastify";
 import type { Metadata } from "next";
+import { AuthProvider } from "./provider";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 
@@ -26,21 +27,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={myFont.className}>
-        <AppRouterCacheProvider>
-          <ThemeProvider theme={GlobalTheme}>
-            <CssBaseline />
-            <>
-              <ToastContainer
-                closeOnClick
-                autoClose={1500}
-                position="top-right"
-                theme="light"
-                pauseOnHover
-              />
-              {children}
-            </>
-          </ThemeProvider>
-        </AppRouterCacheProvider>
+        <AuthProvider>
+          <AppRouterCacheProvider>
+            <ThemeProvider theme={GlobalTheme}>
+              <CssBaseline />
+              <>
+                <ToastContainer
+                  closeOnClick
+                  autoClose={1500}
+                  position="top-right"
+                  theme="light"
+                  pauseOnHover
+                />
+                {children}
+              </>
+            </ThemeProvider>
+          </AppRouterCacheProvider>
+        </AuthProvider>
       </body>
     </html>
   );

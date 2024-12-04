@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid2";
-import { BookClassy, BookWithoutId } from "@/lib/types/types";
+import { Book, BookClassy, BookWithoutId } from "@/lib/types/types";
 import { Dispatch, SetStateAction, useState } from "react";
 import {
   Dialog,
@@ -16,22 +16,22 @@ import {
 
 interface BookDialogProps {
   bookClassies: BookClassy[];
-  openBookDialog: boolean;
-  editedBook: BookWithoutId;
+  openBookUpdateDialog: boolean;
+  editedBook: Book;
   setEditedBook: Dispatch<SetStateAction<BookWithoutId>>;
-  setOpenBookDialog: Dispatch<SetStateAction<boolean>>;
-  handleBookInsert: () => void;
+  setOpenBookUpdateDialog: Dispatch<SetStateAction<boolean>>;
+  handleBookUpdate: () => void;
   isLoading: boolean;
 }
 
-const BookDialog = ({
-  openBookDialog,
+const BookUpdateDialog = ({
+  openBookUpdateDialog,
   setEditedBook,
   editedBook,
   bookClassies,
-  setOpenBookDialog,
-  handleBookInsert,
+  setOpenBookUpdateDialog,
   isLoading,
+  handleBookUpdate,
 }: BookDialogProps) => {
   const [availableCategories, setAvailableCategories] = useState<any[]>([]);
 
@@ -42,10 +42,12 @@ const BookDialog = ({
       bookClassies.find((item) => item.type === selectedType)?.categories || [];
     setAvailableCategories(categories);
   };
-
   return (
-    <Dialog open={openBookDialog} onClose={() => setOpenBookDialog(false)}>
-      <DialogTitle>Yeni Kitap Bilgileri</DialogTitle>
+    <Dialog
+      open={openBookUpdateDialog}
+      onClose={() => setOpenBookUpdateDialog(false)}
+    >
+      <DialogTitle>Kitap Bilgileri Güncelle</DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
           <Grid size={12}>
@@ -104,7 +106,7 @@ const BookDialog = ({
               />
             </Grid>
             <Grid size={4}>
-              <TextField
+            <TextField
                 label="Yayın Yılı"
                 size="small"
                 fullWidth
@@ -138,7 +140,6 @@ const BookDialog = ({
             justifyContent="space-between"
             alignItems="center"
           >
-            {/* Tür Seçimi */}
             <Grid size={6}>
               <FormControl fullWidth size="small">
                 <InputLabel id="tur">Tür</InputLabel>
@@ -258,7 +259,7 @@ const BookDialog = ({
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setOpenBookDialog(false)} color="primary">
+        <Button onClick={() => setOpenBookUpdateDialog(false)} color="primary">
           İptal
         </Button>
         {isLoading ? (
@@ -266,8 +267,8 @@ const BookDialog = ({
             Lütfen Bekleyiniz
           </Button>
         ) : (
-          <Button onClick={handleBookInsert} color="primary">
-            Kaydet
+          <Button onClick={handleBookUpdate} color="primary">
+            Güncelle
           </Button>
         )}
       </DialogActions>
@@ -275,4 +276,4 @@ const BookDialog = ({
   );
 };
 
-export default BookDialog;
+export default BookUpdateDialog;

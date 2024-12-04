@@ -2,6 +2,8 @@
 import dbConnect from "@/lib/db/dbConnect";
 import BookClassyModel from "@/lib/models/BookClassification";
 import BookModel from "@/lib/models/BookModel";
+import UserModel from "@/lib/models/UserModel";
+import bcrypt from "bcryptjs";
 import { Book, BookClassy, BookWithoutId } from "@/lib/types/types";
 import { revalidatePath } from "next/cache";
 
@@ -139,6 +141,29 @@ export const updateBook = async (
   }
 };
 
+export const updateBookStatus = async (
+  bookId: string,
+  status: string
+): Promise<Response> => {
+  try {
+    await dbConnect();
+    await BookModel.findOneAndUpdate(
+      { _id: bookId },
+      { $set: { durum: status } }
+    );
+    revalidatePath(`/`);
+    revalidatePath("/parameters");
+    return { msg: "Kitap Durumu güncellendi", status: true };
+  } catch (error) {
+    return {
+      msg: `Kitap durumu güncellenemedi: ${
+        error instanceof Error ? error.message : error
+      }`,
+      status: false,
+    };
+  }
+};
+
 export const deleteBook = async (bookId: string): Promise<Response> => {
   try {
     await dbConnect();
@@ -200,6 +225,37 @@ export const deleteCategory = async (type: string, categoryName: string) => {
     return {
       status: false,
       msg: "Kategori silme işlemi sırasında bir hata oluştu.",
+    };
+  }
+};
+
+export const addUser = async (
+  prevState: any,
+  formData: any
+): Promise<Response> => {
+  try {
+    const isim = formData.get("isim")?.toString();
+    const email = formData.get("email")?.toString();
+    const password = formData.get("password")?.toString();
+    if (!isim || !email || !password) {
+      return { msg: "Tüm alanları doldurun", status: false };
+    }
+    await dbConnect();
+    const existingUser = await UserModel.findOne({ email }).select("_id");
+    if (existingUser) {
+      return { msg: "Bu kullanıcı zaten kayıtlıdır", status: false };
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userData = { isim, email, password: hashedPassword };
+    await UserModel.create(userData);
+    return { msg: "Kullanıcı başarıyla kaydedildi", status: true };
+  } catch (error) {
+    console.error(`Kullanıcı eklenemedi: ${error}`);
+    return {
+      msg: `Kullanıcı eklenemedi: ${
+        error instanceof Error ? error.message : "Bilinmeyen hata"
+      }`,
+      status: false,
     };
   }
 };

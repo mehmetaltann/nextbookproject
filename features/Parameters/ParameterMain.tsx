@@ -3,10 +3,14 @@ import Grid from "@mui/material/Grid2";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import NoMeetingRoomIcon from "@mui/icons-material/NoMeetingRoom";
+import HomeWorkIcon from "@mui/icons-material/HomeWork";
+import LogoutIcon from "@mui/icons-material/Logout";
+import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import { BookClassy, Category } from "@/lib/types/types";
 import { useState, useEffect } from "react";
 import { handleResponseMsg } from "@/utils/toast-helper";
 import { toast } from "react-toastify";
+import { signOut } from "next-auth/react";
 import {
   addCategoryToType,
   addNewType,
@@ -22,6 +26,7 @@ import {
   TableHead,
   TableRow,
   IconButton,
+  Fab,
 } from "@mui/material";
 
 interface ParameterMainProps {
@@ -40,6 +45,7 @@ const ParameterMain = ({ bookClassies }: ParameterMainProps) => {
       const typeData = bookClassies.find((item) => item.type === selectedType);
       setCategories(typeData ? typeData.categories : []);
     }
+    setShowCategories(true);
   }, [selectedType]);
 
   const handleAddType = async () => {
@@ -87,6 +93,14 @@ const ParameterMain = ({ bookClassies }: ParameterMainProps) => {
       handleResponseMsg(res);
     } catch (error) {
       toast.error("Kategori Eklenemedi, Bir hata oluştu: " + error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut({ callbackUrl: "/login", redirect: true });
+    } catch (error) {
+      toast.error("Çıkış yapılırken hata oluştu.");
     }
   };
 
@@ -192,6 +206,27 @@ const ParameterMain = ({ bookClassies }: ParameterMainProps) => {
           )}
         </Grid>
       </Grid>
+      <Fab
+        color="secondary"
+        onClick={() => (window.location.href = "/")}
+        sx={{ position: "fixed", bottom: "20px", right: "140px" }}
+      >
+        <HomeWorkIcon />
+      </Fab>
+      <Fab
+        color="primary"
+        onClick={() => (window.location.href = "/register")}
+        sx={{ position: "fixed", bottom: "20px", right: "80px" }}
+      >
+        <AppRegistrationIcon />
+      </Fab>
+      <Fab
+        color="default"
+        onClick={handleSignOut}
+        sx={{ position: "fixed", bottom: "20px", right: "20px" }}
+      >
+        <LogoutIcon />
+      </Fab>
     </div>
   );
 };

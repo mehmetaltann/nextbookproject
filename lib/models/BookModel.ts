@@ -8,7 +8,7 @@ const BookSchema = new Schema<Book>({
   yayinevi: String,
   sayfaSayisi: String,
   tur: String,
-  kategori: String,
+  kategori: [String],
   yayinTarihi: String,
   alinmaTarihi: String,
   okunmaTarihi: String,

@@ -5,10 +5,15 @@ import SearchBar from "./SearchBar";
 import StatusDialog from "./StatusDialog";
 import BookDialog from "./BookDialog";
 import BookCard from "./BookCard";
-import dayjs from "dayjs";
-import { useState, useEffect } from "react";
+import BookUpdateDialog from "./BookUpdateDialog";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
+import { useState, useEffect, useMemo } from "react";
 import { Book, BookClassy, BookWithoutId } from "@/lib/types/types";
 import { AppBar, Toolbar, Typography, Tabs, Tab, Fab } from "@mui/material";
+import { toast } from "react-toastify";
+import { handleResponseMsg } from "@/utils/toast-helper";
+import { addBooks, updateBook, updateBookStatus } from "@/app/actions/action";
+import { useRouter } from "next/router";
 
 interface BookLibraryProps {
   books: Book[];
@@ -22,41 +27,57 @@ const initalBookData: BookWithoutId = {
   yayinevi: "",
   sayfaSayisi: "",
   tur: "",
-  kategori: "",
-  yayinTarihi: dayjs().format("YYYY-MM-DD"),
-  alinmaTarihi: dayjs().format("YYYY-MM-DD"),
-  okunmaTarihi: dayjs().format("YYYY-MM-DD"),
+  kategori: [],
+  yayinTarihi: "",
+  alinmaTarihi: "",
+  okunmaTarihi: "",
   alinmaYeri: "",
   coverImage: "",
-  durum: "Okunmadı",
+  durum: "okunacak",
 };
 
 const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [openStatusDialog, setOpenStatusDialog] = useState<boolean>(false);
   const [openBookDialog, setOpenBookDialog] = useState<boolean>(false);
+  const [openBookUpdateDialog, setOpenBookUpdateDialog] =
+    useState<boolean>(false);
   const [durum, setDurum] = useState<string>("");
-  const [editedBook, setEditedBook] = useState<BookWithoutId>(initalBookData);
+  const [editedBook, setEditedBook] = useState<any>(initalBookData);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [isLoading, setIsloading] = useState<boolean>(false);
+  const router = useRouter();
+  const navigateToParameters = () => router.push("/parameters");
 
-  const filteredBooks = books.filter(
-    (book) =>
-      book.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      book.author.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-  );
+  const filteredBooks = useMemo(() => {
+    return books.filter((book) => {
+      const searchQuery = debouncedSearchTerm.toLowerCase();
+      const isTitleOrAuthorMatch =
+        book.title.toLowerCase().includes(searchQuery) ||
+        book.author.toLowerCase().includes(searchQuery);
+      const isCategoryMatch = book.kategori.some((kategori) =>
+        kategori.toLowerCase().includes(searchQuery)
+      );
+      return isTitleOrAuthorMatch || isCategoryMatch;
+    });
+  }, [debouncedSearchTerm, books]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 1000);
-
+    }, 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
   const handleOpenStatusDialog = (book: BookWithoutId) => {
-    setDurum(book.durum);
+    setEditedBook(book);
     setOpenStatusDialog(true);
+  };
+
+  const handleOpenBookUpdateDialog = (book: BookWithoutId) => {
+    setEditedBook(book);
+    setOpenBookUpdateDialog(true);
   };
 
   const handleOpenBookDialog = (book: BookWithoutId) => {
@@ -64,60 +85,97 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
     setOpenBookDialog(true);
   };
 
+  const handleBookStatusUpdate = async () => {
+    try {
+      setIsloading(true);
+      const res = await updateBookStatus(editedBook._id, durum);
+      handleResponseMsg(res);
+      setOpenStatusDialog(false);
+    } catch (error) {
+      toast.error("Kitap Durumu Güncellenemedi, Bir hata oluştu: " + error);
+    } finally {
+      setIsloading(false);
+    }
+  };
+
+  const handleBookUpdate = async () => {
+    try {
+      setIsloading(true);
+      const res = await updateBook(editedBook._id, editedBook);
+      handleResponseMsg(res);
+      setOpenBookUpdateDialog(false);
+    } catch (error) {
+      toast.error("Kitap Güncellenemedi, Bir hata oluştu: " + error);
+    } finally {
+      setIsloading(false);
+    }
+  };
+
   const handleBookInsert = async () => {
-    console.log(editedBook);
-    setOpenBookDialog(false);
+    try {
+      const res = await addBooks(editedBook);
+      handleResponseMsg(res);
+      setOpenBookDialog(false);
+    } catch (error) {
+      toast.error("Kitap Eklenemedi, Bir hata oluştu: " + error);
+    }
   };
 
   return (
     <div>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6">Kütüphanem</Typography>
+          <Typography sx={{ pr: 2 }} variant="h6">
+            Kütüphanem
+          </Typography>
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </Toolbar>
       </AppBar>
-
       <Tabs
         value={activeTab}
         onChange={(event, newValue) => setActiveTab(newValue)}
         centered
       >
-        <Tab label="Okunan Kitaplar" />
         <Tab label="Okunacak Kitaplar" />
-        <Tab label="Favoriler" />
+        <Tab label="Şu Sıralar Okunuyor" />
+        <Tab label="Okunmuş Kitaplar " />
       </Tabs>
-
-      <Grid container spacing={3} style={{ padding: "20px" }}>
+      <Grid container spacing={2} sx={{ p: 1 }} alignItems="stretch">
         {filteredBooks
           .filter(
             (book) =>
-              (activeTab === 0 && book.durum === "okundu") ||
-              (activeTab === 1 && book.durum === "okunacak") ||
-              (activeTab === 2 && book.durum === "okunuyor")
+              (activeTab === 0 && book.durum === "okunacak") ||
+              (activeTab === 1 && book.durum === "okunuyor") ||
+              (activeTab === 2 && book.durum === "okundu")
           )
           .map((book) => (
-            <Grid key={book._id} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid key={book._id} size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}>
               <BookCard
                 book={book}
-                onStatusChange={handleOpenStatusDialog}
-                onEdit={handleOpenBookDialog}
+                handleOpenStatusDialog={handleOpenStatusDialog}
+                handleOpenBookUpdateDialog={handleOpenBookUpdateDialog}
               />
             </Grid>
           ))}
       </Grid>
-
       <Fab
         color="primary"
         onClick={() => handleOpenBookDialog(initalBookData)}
-        style={{ position: "fixed", bottom: "20px", right: "20px" }}
+        sx={{ position: "fixed", bottom: "20px", right: "80px" }}
       >
         <AddIcon />
       </Fab>
-
+      <Fab
+        color="secondary"
+        onClick={navigateToParameters}
+        sx={{ position: "fixed", bottom: "20px", right: "20px" }}
+      >
+        <SkipNextIcon />
+      </Fab>
       <StatusDialog
         openStatusDialog={openStatusDialog}
         setOpenStatusDialog={setOpenStatusDialog}
+        handleBookStatusUpdate={handleBookStatusUpdate}
         durum={durum}
         setDurum={setDurum}
       />
@@ -128,6 +186,16 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
         setEditedBook={setEditedBook}
         handleBookInsert={handleBookInsert}
         bookClassies={bookClassies}
+        isLoading={isLoading}
+      />
+      <BookUpdateDialog
+        openBookUpdateDialog={openBookUpdateDialog}
+        setOpenBookUpdateDialog={setOpenBookUpdateDialog}
+        editedBook={editedBook}
+        setEditedBook={setEditedBook}
+        handleBookUpdate={handleBookUpdate}
+        bookClassies={bookClassies}
+        isLoading={isLoading}
       />
     </div>
   );

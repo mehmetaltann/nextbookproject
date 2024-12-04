@@ -14,9 +14,11 @@ interface StatusDialogProps {
   durum: string;
   setDurum: Dispatch<SetStateAction<string>>;
   setOpenStatusDialog: Dispatch<SetStateAction<boolean>>;
+  handleBookStatusUpdate: () => void;
 }
 
 const StatusDialog = ({
+  handleBookStatusUpdate,
   openStatusDialog,
   setOpenStatusDialog,
   durum,
@@ -40,7 +42,7 @@ const StatusDialog = ({
         <Button onClick={() => setOpenStatusDialog(false)} color="primary">
           İptal
         </Button>
-        <Button onClick={() => setOpenStatusDialog(false)} color="primary">
+        <Button onClick={handleBookStatusUpdate} color="primary">
           Kaydet
         </Button>
       </DialogActions>

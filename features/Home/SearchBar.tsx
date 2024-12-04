@@ -20,7 +20,7 @@ const SearchBar = ({ searchTerm, setSearchTerm }: SearchBarProps) => {
         marginLeft: "auto",
         marginRight: "20px",
         "& .MuiOutlinedInput-root": {
-          backgroundColor: "white", // İç kısmı beyaz yapar
+          backgroundColor: "white",
           "& fieldset": {
             borderColor: "white",
           },
