@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { handleResponseMsg } from "@/utils/toast-helper";
 import { toast } from "react-toastify";
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   addCategoryToType,
   addNewType,
@@ -39,6 +40,9 @@ const ParameterMain = ({ bookClassies }: ParameterMainProps) => {
   const [selectedType, setSelectedType] = useState<string>("");
   const [newCategory, setNewCategory] = useState<string>("");
   const [categories, setCategories] = useState<Category[]>([]);
+  const router = useRouter();
+  const navigateToHome = () => router.push("/");
+  const navigateToRegister = () => router.push("/register");
 
   useEffect(() => {
     if (selectedType) {
@@ -207,15 +211,15 @@ const ParameterMain = ({ bookClassies }: ParameterMainProps) => {
         </Grid>
       </Grid>
       <Fab
-        color="secondary"
-        onClick={() => (window.location.href = "/")}
+        color="primary"
+        onClick={navigateToHome}
         sx={{ position: "fixed", bottom: "20px", right: "140px" }}
       >
         <HomeWorkIcon />
       </Fab>
       <Fab
-        color="primary"
-        onClick={() => (window.location.href = "/register")}
+        color="secondary"
+        onClick={navigateToRegister}
         sx={{ position: "fixed", bottom: "20px", right: "80px" }}
       >
         <AppRegistrationIcon />

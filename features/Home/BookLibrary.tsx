@@ -13,7 +13,7 @@ import { AppBar, Toolbar, Typography, Tabs, Tab, Fab } from "@mui/material";
 import { toast } from "react-toastify";
 import { handleResponseMsg } from "@/utils/toast-helper";
 import { addBooks, updateBook, updateBookStatus } from "@/app/actions/action";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface BookLibraryProps {
   books: Book[];
