@@ -2,10 +2,10 @@ import mongoose, { Model, Schema } from "mongoose";
 import { BookClassy } from "../types/types";
 
 const BookClassySchema = new Schema<BookClassy>({
-  type: { type: String, required: true },
+  type: String,
   categories: [
     {
-      name: { type: String, required: true },
+      name: String,
     },
   ],
 });

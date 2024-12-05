@@ -15,6 +15,7 @@ const BookSchema = new Schema<Book>({
   alinmaYeri: String,
   coverImage: String,
   durum: String,
+  notlar: String,
 });
 
 const BookModel: Model<Book> =

@@ -4,7 +4,12 @@ import BookClassyModel from "@/lib/models/BookClassification";
 import BookModel from "@/lib/models/BookModel";
 import UserModel from "@/lib/models/UserModel";
 import bcrypt from "bcryptjs";
-import { Book, BookClassy, BookWithoutId } from "@/lib/types/types";
+import {
+  Book,
+  BookClassy,
+  BookClassyWithoutId,
+  BookWithoutId,
+} from "@/lib/types/types";
 import { revalidatePath } from "next/cache";
 
 interface Response {
@@ -15,7 +20,24 @@ interface Response {
 export const fetchBooks = async (): Promise<Book[]> => {
   try {
     await dbConnect();
-    const allBooks = await BookModel.find({}).lean();
+    const allBooks = await BookModel.aggregate([
+      {
+        $addFields: {
+          okunmaYili: { $toInt: "$okunmaTarihi" },
+        },
+      },
+      {
+        $sort: {
+          okunmaYili: -1,
+          author: 1,
+        },
+      },
+      {
+        $project: {
+          okunmaYili: 0,
+        },
+      },
+    ]);
     const filteredAllItems: Book[] = JSON.parse(JSON.stringify(allBooks));
     return filteredAllItems as Book[];
   } catch (error) {
@@ -65,13 +87,12 @@ export const addBooks = async (formData: BookWithoutId): Promise<Response> => {
   }
 };
 
-export const addNewType = async (newType: string) => {
+export const addNewType = async (newType: string): Promise<Response> => {
   try {
+    if (newType === "") return { status: false, msg: `Tür Bilgisi Boş Olamaz` };
     const existingType = await BookClassyModel.findOne({ type: newType });
-    if (existingType) {
-      console.log(`${newType} türü zaten mevcut.`);
+    if (existingType)
       return { status: false, msg: `${newType} türü zaten mevcut.` };
-    }
     const newBookClassy = new BookClassyModel({
       type: newType,
       categories: [],
@@ -89,25 +110,27 @@ export const addNewType = async (newType: string) => {
   }
 };
 
-export const addCategoryToType = async (type: string, newCategory: string) => {
+export const addCategoryToType = async (
+  type: string,
+  newCategory: string
+): Promise<Response> => {
   try {
+    if (newCategory === "")
+      return { status: false, msg: `Kategori Bilgisi Boş Olamaz` };
     const bookClassy = await BookClassyModel.findOne({ type });
     if (!bookClassy) {
-      console.log(`${type} türü bulunamadı.`);
       return { status: false, msg: `${type} türü bulunamadı.` };
     }
     const categoryExists = bookClassy.categories.some(
       (category) => category.name === newCategory
     );
     if (categoryExists) {
-      console.log(`${newCategory} kategorisi zaten mevcut.`);
       return { status: false, msg: `${newCategory} kategorisi zaten mevcut.` };
     }
     bookClassy.categories.push({ name: newCategory });
     await bookClassy.save();
     revalidatePath("/parameters");
     revalidatePath("/");
-    console.log(`${newCategory} kategorisi başarıyla eklendi.`);
     return {
       status: true,
       msg: `${newCategory} kategorisi başarıyla eklendi.`,
@@ -184,6 +207,16 @@ export const deleteBook = async (bookId: string): Promise<Response> => {
 export const deleteType = async (bookClassyID: string): Promise<Response> => {
   try {
     await dbConnect();
+    const bookClassy = await BookClassyModel.findById(bookClassyID);
+    if (!bookClassy) {
+      return { msg: "Kitap Türü Bulunamadı", status: false };
+    }
+    if (bookClassy.categories && bookClassy.categories.length > 0) {
+      return {
+        msg: "Kitap Türü Silinemez. Kategori bilgileri var. Öncelikle kategorilini siliniz.",
+        status: false,
+      };
+    }
     await BookClassyModel.findByIdAndDelete(bookClassyID);
     revalidatePath(`/parameters`);
     revalidatePath("/");
@@ -197,7 +230,10 @@ export const deleteType = async (bookClassyID: string): Promise<Response> => {
   }
 };
 
-export const deleteCategory = async (type: string, categoryName: string) => {
+export const deleteCategory = async (
+  type: string,
+  categoryName: string
+): Promise<Response> => {
   try {
     const bookClassy = await BookClassyModel.findOne({ type });
 

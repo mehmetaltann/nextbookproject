@@ -9,11 +9,20 @@ import BookUpdateDialog from "./BookUpdateDialog";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import { useState, useEffect, useMemo } from "react";
 import { Book, BookClassy, BookWithoutId } from "@/lib/types/types";
-import { AppBar, Toolbar, Typography, Tabs, Tab, Fab } from "@mui/material";
 import { toast } from "react-toastify";
 import { handleResponseMsg } from "@/utils/toast-helper";
 import { addBooks, updateBook, updateBookStatus } from "@/app/actions/action";
 import { useRouter } from "next/navigation";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Tabs,
+  Tab,
+  Fab,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 
 interface BookLibraryProps {
   books: Book[];
@@ -34,10 +43,11 @@ const initalBookData: BookWithoutId = {
   alinmaYeri: "",
   coverImage: "",
   durum: "okunacak",
+  notlar: "",
 };
 
 const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<number>(2);
   const [openStatusDialog, setOpenStatusDialog] = useState<boolean>(false);
   const [openBookDialog, setOpenBookDialog] = useState<boolean>(false);
   const [openBookUpdateDialog, setOpenBookUpdateDialog] =
@@ -47,6 +57,8 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isLoading, setIsloading] = useState<boolean>(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const router = useRouter();
   const navigateToParameters = () => router.push("/parameters");
 
@@ -134,11 +146,13 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
       <Tabs
         value={activeTab}
         onChange={(event, newValue) => setActiveTab(newValue)}
-        centered
+        variant={isMobile ? "scrollable" : "standard"}
+        scrollButtons={isMobile ? "auto" : undefined}
+        centered={!isMobile}
       >
         <Tab label="Okunacak Kitaplar" />
         <Tab label="Şu Sıralar Okunuyor" />
-        <Tab label="Okunmuş Kitaplar " />
+        <Tab label="Okunmuş Kitaplar" />
       </Tabs>
       <Grid container spacing={2} sx={{ p: 1 }} alignItems="stretch">
         {filteredBooks

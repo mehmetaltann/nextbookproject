@@ -25,11 +25,21 @@ const StatusDialog = ({
   setDurum,
 }: StatusDialogProps) => {
   return (
-    <Dialog open={openStatusDialog} onClose={() => setOpenStatusDialog(false)}>
+    <Dialog
+      open={openStatusDialog}
+      onClose={() => setOpenStatusDialog(false)}
+      sx={{
+        "& .MuiDialog-paper": {
+          minWidth: "250px",
+        },
+      }}
+    >
       <DialogTitle>Durum Değiştir</DialogTitle>
       <DialogContent>
         <Select
           value={durum}
+          size="small"
+          sx={{ width: "100%" }}
           onChange={(e) => setDurum(e.target.value)}
           fullWidth
         >

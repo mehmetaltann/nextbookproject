@@ -77,16 +77,37 @@ const BookUpdateDialog = ({
               }}
             />
           </Grid>
-          <Grid size={12}>
-            <TextField
-              label="Yazar"
-              fullWidth
-              size="small"
-              value={editedBook.author}
-              onChange={(e) =>
-                setEditedBook({ ...editedBook, author: e.target.value })
-              }
-            />
+          <Grid
+            size={12}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Grid size={8}>
+              <TextField
+                label="Yazar"
+                fullWidth
+                size="small"
+                value={editedBook.author}
+                onChange={(e) =>
+                  setEditedBook({ ...editedBook, author: e.target.value })
+                }
+              />
+            </Grid>
+            <Grid size={4}>
+              <Select
+                value={editedBook.durum}
+                size="small"
+                onChange={(e) =>
+                  setEditedBook({ ...editedBook, durum: e.target.value })
+                }
+                fullWidth
+              >
+                <MenuItem value="okunuyor">Okunuyor</MenuItem>
+                <MenuItem value="okundu">Okundu</MenuItem>
+                <MenuItem value="okunacak">Okunacak</MenuItem>
+              </Select>
+            </Grid>
           </Grid>
           <Grid
             size={12}
@@ -106,7 +127,7 @@ const BookUpdateDialog = ({
               />
             </Grid>
             <Grid size={4}>
-            <TextField
+              <TextField
                 label="Yayın Yılı"
                 size="small"
                 fullWidth
@@ -241,6 +262,22 @@ const BookUpdateDialog = ({
                 }
               />
             </Grid>
+          </Grid>
+          <Grid size={12}>
+            <TextField
+              label="Notlar"
+              size="small"
+              fullWidth
+              multiline
+              rows={2}
+              value={editedBook.notlar}
+              onChange={(e) =>
+                setEditedBook({
+                  ...editedBook,
+                  notlar: e.target.value,
+                })
+              }
+            />
           </Grid>
           <Grid size={12}>
             <TextField

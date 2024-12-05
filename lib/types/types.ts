@@ -13,6 +13,7 @@ export type Book = {
   alinmaYeri: string;
   coverImage: string;
   durum: string;
+  notlar: string;
 };
 
 export type BookWithoutId = {
@@ -29,6 +30,7 @@ export type BookWithoutId = {
   alinmaYeri: string;
   coverImage: string;
   durum: string;
+  notlar: string;
 };
 
 export type BookClassy = {
