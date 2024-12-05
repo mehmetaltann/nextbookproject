@@ -23,7 +23,15 @@ export const fetchBooks = async (): Promise<Book[]> => {
     const allBooks = await BookModel.aggregate([
       {
         $addFields: {
-          okunmaYili: { $toInt: "$okunmaTarihi" },
+          okunmaYili: {
+            $toInt: {
+              $cond: {
+                if: { $eq: ["$okunmaTarihi", ""] },
+                then: "$alinmaTarihi",
+                else: "$okunmaTarihi",
+              },
+            },
+          },
         },
       },
       {

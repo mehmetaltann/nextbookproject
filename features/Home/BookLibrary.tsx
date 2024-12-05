@@ -1,28 +1,25 @@
 "use client";
+import LibraryHeader from "./LibraryHeader";
 import Grid from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
-import SearchBar from "./SearchBar";
 import StatusDialog from "./StatusDialog";
 import BookDialog from "./BookDialog";
 import BookCard from "./BookCard";
 import BookUpdateDialog from "./BookUpdateDialog";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
-import { useState, useEffect, useMemo } from "react";
 import { Book, BookClassy, BookWithoutId } from "@/lib/types/types";
 import { toast } from "react-toastify";
 import { handleResponseMsg } from "@/utils/toast-helper";
 import { addBooks, updateBook, updateBookStatus } from "@/app/actions/action";
 import { useRouter } from "next/navigation";
+import { Tabs, Tab, Fab, useTheme, useMediaQuery } from "@mui/material";
 import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Tabs,
-  Tab,
-  Fab,
-  useTheme,
-  useMediaQuery,
-} from "@mui/material";
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  SetStateAction,
+} from "react";
 
 interface BookLibraryProps {
   books: Book[];
@@ -57,30 +54,66 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isLoading, setIsloading] = useState<boolean>(false);
+  const [selectedYear, setSelectedYear] = useState<string>("Tümü");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const router = useRouter();
   const navigateToParameters = () => router.push("/parameters");
 
+  const years = useMemo(() => {
+    const relevantBooks = books.filter((book) =>
+      activeTab === 2 ? book.durum === "okundu" : true
+    );
+    return [
+      "Tümü",
+      ...new Set(
+        relevantBooks
+          .map((book) => {
+            const date =
+              activeTab === 2 ? book.okunmaTarihi : book.alinmaTarihi;
+            return date ? date.slice(0, 4) : "";
+          })
+          .filter((year) => year !== "")
+      ),
+    ];
+  }, [books, activeTab]);
+
+  // Filtered Books based on search, year and tab
   const filteredBooks = useMemo(() => {
+    const searchQuery = debouncedSearchTerm.toLowerCase();
     return books.filter((book) => {
-      const searchQuery = debouncedSearchTerm.toLowerCase();
       const isTitleOrAuthorMatch =
         book.title.toLowerCase().includes(searchQuery) ||
         book.author.toLowerCase().includes(searchQuery);
       const isCategoryMatch = book.kategori.some((kategori) =>
         kategori.toLowerCase().includes(searchQuery)
       );
-      return isTitleOrAuthorMatch || isCategoryMatch;
+      const isYearMatch =
+        selectedYear === "Tümü" ||
+        (activeTab === 2 && book.okunmaTarihi.startsWith(selectedYear)) ||
+        ((activeTab === 0 || activeTab === 1) &&
+          book.alinmaTarihi.startsWith(selectedYear));
+      const isTabMatch =
+        (activeTab === 0 && book.durum === "okunacak") ||
+        (activeTab === 1 && book.durum === "okunuyor") ||
+        (activeTab === 2 && book.durum === "okundu");
+
+      return (
+        (isTitleOrAuthorMatch || isCategoryMatch) && isYearMatch && isTabMatch
+      );
     });
-  }, [debouncedSearchTerm, books]);
+  }, [debouncedSearchTerm, books, selectedYear, activeTab]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 500);
+    const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  // Handle Tab Change
+  const handleTabChange = (event: any, newValue: number) => {
+    setActiveTab(newValue);
+    setSelectedYear("Tümü");
+  };
 
   const handleOpenStatusDialog = (book: BookWithoutId) => {
     setEditedBook(book);
@@ -97,7 +130,7 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
     setOpenBookDialog(true);
   };
 
-  const handleBookStatusUpdate = async () => {
+  const handleBookStatusUpdate = useCallback(async () => {
     try {
       setIsloading(true);
       const res = await updateBookStatus(editedBook._id, durum);
@@ -108,9 +141,9 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
     } finally {
       setIsloading(false);
     }
-  };
+  }, [editedBook._id, durum]);
 
-  const handleBookUpdate = async () => {
+  const handleBookUpdate = useCallback(async () => {
     try {
       setIsloading(true);
       const res = await updateBook(editedBook._id, editedBook);
@@ -121,9 +154,9 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
     } finally {
       setIsloading(false);
     }
-  };
+  }, [editedBook._id, editedBook]);
 
-  const handleBookInsert = async () => {
+  const handleBookInsert = useCallback(async () => {
     try {
       const res = await addBooks(editedBook);
       handleResponseMsg(res);
@@ -131,24 +164,26 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
     } catch (error) {
       toast.error("Kitap Eklenemedi, Bir hata oluştu: " + error);
     }
-  };
+  }, [editedBook]);
 
   return (
-    <div>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography sx={{ pr: 2 }} variant="h6">
-            Kütüphanem
-          </Typography>
-          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        </Toolbar>
-      </AppBar>
+    <>
+      <LibraryHeader
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
+        years={years}
+        books={books}
+        activeTab={activeTab}
+      />
       <Tabs
         value={activeTab}
-        onChange={(event, newValue) => setActiveTab(newValue)}
+        onChange={handleTabChange}
         variant={isMobile ? "scrollable" : "standard"}
         scrollButtons={isMobile ? "auto" : undefined}
         centered={!isMobile}
+        sx={{ mb: 2 }}
       >
         <Tab label="Okunacak Kitaplar" />
         <Tab label="Şu Sıralar Okunuyor" />
@@ -211,7 +246,7 @@ const BookLibrary = ({ books, bookClassies }: BookLibraryProps) => {
         bookClassies={bookClassies}
         isLoading={isLoading}
       />
-    </div>
+    </>
   );
 };
 

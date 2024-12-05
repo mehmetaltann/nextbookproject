@@ -22,7 +22,7 @@ const DateAndEditBox = ({
         justifyContent: "space-between",
       }}
     >
-      {book.okunmaTarihi && (
+      {book.okunmaTarihi && book.okunmaTarihi !== "" && (
         <Box
           sx={{
             display: "flex",

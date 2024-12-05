@@ -16,6 +16,9 @@ const SearchBar = ({ searchTerm, setSearchTerm }: SearchBarProps) => {
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
       sx={{
+        flex: 1,
+        backgroundColor: "white",
+        borderRadius: "4px",
         maxWidth: "20rem",
         marginLeft: "auto",
         marginRight: "20px",

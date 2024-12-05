@@ -126,7 +126,7 @@ const BookDialog = ({
             </Grid>
             <Grid size={4}>
               <TextField
-                label="Yayın Yılı"
+                label="İlk Yayın Yılı"
                 size="small"
                 fullWidth
                 value={editedBook.yayinTarihi}

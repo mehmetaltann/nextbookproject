@@ -29,7 +29,7 @@ const TitleAndAuthorBox = ({ book }: TitleAndAuthorBoxProps) => {
         color="text.secondary"
         sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
       >
-        <strong>Yazar:</strong> {book.author}
+        <strong>Yazar: </strong> {book.author}
       </Typography>
     </Box>
   );
